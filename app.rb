@@ -17,8 +17,8 @@ require 'uri'
 # u.password = result["password"]
 # u.save
 
-get '/' do
-  "ようこそ!このサイトは、POSTを掛けることによりデータベースに追加していきます。URL\"localhost:8080/add\""
+get '/' do#将来的に削除したほうがいいかも。実際不要なメソッドだし
+  "ようこそ!このサイトは、POSTを掛けることによりデータベースに追加していきます。"
 end
 
 post '/get' do#取得 グループID 聞く
@@ -26,14 +26,11 @@ post '/get' do#取得 グループID 聞く
   result["groupid"]
 
   # u = User.where(:userid => result["userid"]).first
-
-
 end
 
-post '/signup' do#ログイン部分
+post '/signup' do#会員登録部分/実装完了
+  #userid/password/nickname
   result = JSON.parse(request.body.read)
-  #形式: userid/password/nickname
-
   u = User.where(:userid => result["userid"]).first
 
   if u == nil
@@ -49,8 +46,8 @@ post '/signup' do#ログイン部分
   end
 end
 
-
-post '/regist' do#受け取るデータは緯度経度とID
+post '/regist' do#緯度経度登録部分/実装完了
+  #userid/latitude/longitude
   result = JSON.parse(request.body.read)
 
   u = User.where(:userid => result["userid"]).first
@@ -67,7 +64,8 @@ post '/regist' do#受け取るデータは緯度経度とID
 
 end
 
-post '/login' do#受け取るデータはID/PW
+post '/login' do#ログイン部分/仮実装完了
+  #userid/password
   result = JSON.parse(request.body.read)
   gather = User.find_by[userid:result["id"]]
 
@@ -82,9 +80,8 @@ post '/login' do#受け取るデータはID/PW
 
 end
 
-post '/makegroup' do#グループ作成
+post '/makegroup' do#グループ作成/実装完了
   #groupname/userid
-
   result = JSON.parse(request.body.read)
 
   newgroupid = while true
@@ -104,5 +101,24 @@ post '/makegroup' do#グループ作成
   gu.groupid = newgroupid
   gu.user = result["userid"]
   gu.save
+
+end
+
+post '/ingroup' do#グループ作成/実装完了
+  #groupid/userid
+  result = JSON.parse(request.body.read)
+
+  g = Group.where(:groupid => result["groupid"]).first
+
+  if g != nil
+    gu = Groupuser.new
+    gu.groupid = result["groupid"]
+    gu.user = result["userid"]
+    gu.save
+
+    "グループ名:#{g.groupname}に入りました。"
+  else
+    "グループが存在しません。グループIDを確認して下さい。"
+  end
 
 end
