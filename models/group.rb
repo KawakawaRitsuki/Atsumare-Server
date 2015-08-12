@@ -1,1 +1,3 @@
-class Group < ActiveRecord::Base; end
+class Group < ActiveRecord::Base;
+#  has_many :groupuser
+end
