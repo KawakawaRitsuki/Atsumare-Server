@@ -142,9 +142,9 @@ post '/ingroup' do#グループに入る/実装完了
   #重複していないかを確認
   result = JSON.parse(request.body.read)
 
-  g = Group.find_by[groupid:result["groupid"]]
-  if g != nil
+  g = Group.where(:groupid => result["groupid"]).first
 
+  if g != nil
     gu = Groupuser.new
     gu.groupid = result["groupid"]
     gu.user = result["userid"]
