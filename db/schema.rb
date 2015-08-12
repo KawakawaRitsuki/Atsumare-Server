@@ -11,14 +11,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150812021030) do
+ActiveRecord::Schema.define(version: 20150812151423) do
 
   create_table "groups", force: :cascade do |t|
     t.string "groupid"
     t.string "groupname"
   end
 
-  create_table "groupuser", force: :cascade do |t|
+  create_table "groupusers", force: :cascade do |t|
     t.string "groupid"
     t.string "user"
   end
