@@ -13,6 +13,29 @@ get '/' do
   "ようこそ!このサイトは、POSTを掛けることによりデータベースに追加していきます。URL\"localhost:8080/add\""
 end
 
+
+
+post '/signup' do#受け取るデータは緯度経度とID
+  result = JSON.parse(request.body.read)
+  #{"userid":"ユーザーID","password":"パスワード","nickname":"ニックネーム","latitude":"緯度","longitude":"経度","loginnow":"ログイン中"}
+  #形式: userid/password/nickname
+
+  u = User.where(:userid => result["userid"]).first
+
+  if u.
+
+    p u
+
+    u.userid = result["userid"]
+    u.password = result["password"]
+    u.nickname = result["nickname"]
+
+    u.save
+  end
+
+end
+
+
 post '/regist' do#受け取るデータは緯度経度とID
   result = JSON.parse(request.body.read)
   #{"userid":"ユーザーID","password":"パスワード","nickname":"ニックネーム","latitude":"緯度","longitude":"経度","loginnow":"ログイン中"}
@@ -24,11 +47,15 @@ post '/regist' do#受け取るデータは緯度経度とID
 
   u = User.where(:userid => result["userid"]).first
 
-  p u
-
-  u.latitude = result["latitude"]
-  u.longitude = result["longitude"]
+  if u != nil
+    u.latitude = result["latitude"]
+    u.longitude = result["longitude"]
     u.save
+    "Registed"
+    "位置情報更新完了"
+  else
+    "そのようなUserIDは存在しません。（本来ならこのレスポンスは返りません）"
+  end
 
 end
 
