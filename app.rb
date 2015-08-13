@@ -4,10 +4,9 @@ require 'sinatra/reloader' if development?
 require 'open-uri'
 require "sinatra/json"
 ActiveRecord::Base.establish_connection(ENV['DATABASE_URL']||"sqlite3:db/development.db")
-require './models/gather.rb'
 require './models/user.rb'
 require './models/group.rb'
-require './models/groupuser.rb'
+require './models/groups_user.rb'
 require 'json'
 require 'uri'
 
@@ -41,35 +40,23 @@ post '/get' do#取得部分/未実装
 
   group.pluck(:user).size.times{ |e|
     puts group.pluck(:user)[e]
-    # us = User.find_by(userid: group.pluck(:user)[e])#User.where(userid:group.pluck(:user)[num]).first!
-    # "#{group.pluck(:user)[e]},#{us.username},#{us.longitude}"
   }
 
-
-
-
-  # g = Group.where(:groupid => result["groupid"]).first
-  # if g != nil
-  #   Groupuser.find_each do |us|
-  #     u = User.find_by[userid:us.user]
-  #     "#{u.userid},#{u.latitude},#{u.longitude}"
-  #   end
-  # end
 end
 
 post '/signup' do#会員登録部分/実装完了
-  #userid/password/username
+  #user_id/password/user_name
   result = JSON.parse(request.body.read)
-  u = User.where(:userid => result["userid"]).first
+  u = User.where(:user_id => result["user_id"]).first
 
   if u == nil
     u = User.new
-    u.userid = result["userid"]
+    u.user_id = result["user_id"]
     u.password = result["password"]
-    u.username = result["username"]
+    u.user_name = result["user_name"]
     u.latitude = 0
     u.longitude = 0
-    u.loginnow = ""
+    u.login_now = ""
     u.save
     # "Signuped"
     "会員登録完了"
@@ -78,10 +65,9 @@ post '/signup' do#会員登録部分/実装完了
   end
 end
 
-post '/login' do#ログイン部分/仮実装完了
   #userid/password
   result = JSON.parse(request.body.read)
-  gather = User.find_by[userid:result["id"]]
+  gather = User.find_by[user_id:result["id"]]
 
   if gather == nil
     "IDが存在しません"
@@ -98,7 +84,7 @@ post '/regist' do#緯度経度登録部分/実装完了
   #userid/latitude/longitude
   result = JSON.parse(request.body.read)
 
-  u = User.where(:userid => result["userid"]).first
+  u = User.where(:user_id => result["user_id"]).first
 
   if u != nil
     u.latitude = result["latitude"]
@@ -113,25 +99,25 @@ post '/regist' do#緯度経度登録部分/実装完了
 end
 
 post '/makegroup' do#グループ作成/実装完了
-  #groupname/userid
+  #group_name/user_id
   result = JSON.parse(request.body.read)
 
   newgroupid = while true
     tempid = ((0..9).to_a + ("a".."z").to_a + ("A".."Z").to_a).sample(5).join
-    g = Group.where(:groupid => tempid).first
+    g = Group.where(:group_id => tempid).first
     if g == nil
       break tempid
     end
   end
 
   g  = Group.new
-  g.groupid = newgroupid
-  g.groupname = result["groupname"]
+  g.group_id = newgroupid
+  g.group_name = result["group_name"]
   g.save
 
-  gu = Groupuser.new
-  gu.groupid = newgroupid
-  gu.user = result["userid"]
+  gu = GroupsUser.new
+  gu.group_id = newgroupid
+  gu.user_id = result["user_id"]
   gu.save
 
 end
@@ -142,12 +128,12 @@ post '/ingroup' do#グループに入る/実装完了
   #重複していないかを確認
   result = JSON.parse(request.body.read)
 
-  g = Group.where(:groupid => result["groupid"]).first
+  g = Group.where(:group_id => result["group_id"]).first
 
   if g != nil
     gu = Groupuser.new
-    gu.groupid = result["groupid"]
-    gu.user = result["userid"]
+    gu.group_id = result["group_id"]
+    gu.user_id = result["user_id"]
     gu.save
 
     "グループ名:#{g.groupname}に入りました。"
@@ -156,16 +142,16 @@ post '/ingroup' do#グループに入る/実装完了
   end
 end
 
-post '/outgroup' do#グループから出る/実装完了（未確認）
-  #groupid/userid
-  result = JSON.parse(request.body.read)
-  g = Groupuser.where(:groupid => result["groupid"]).first
-
-  if g != nil
-    g.destroy
-
-    "グループ名:#{g.groupname}から出ました。"
-  else
-    "このグループには入っていません。グループIDを確認して下さい。"
-  end
-end
+# post '/outgroup' do#グループから出る/実装完了（未確認）
+#   #groupid/userid
+#   result = JSON.parse(request.body.read)
+#   g = Group.where(:groupid => result["groupid"]).first
+#
+#   if g != nil
+#     gu = Groupuser.where(:groupid => result["groupid"]).first
+#     gu.destroy
+#     "グループ名:#{g.groupname}から退出しました。"
+#   else
+#     "このグループには入っていません。グループIDを確認して下さい。"
+#   end
+# end

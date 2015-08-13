@@ -11,25 +11,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150812151423) do
+ActiveRecord::Schema.define(version: 20150813003938) do
 
   create_table "groups", force: :cascade do |t|
-    t.string "groupid"
-    t.string "groupname"
+    t.string "group_id"
+    t.string "group_name"
   end
 
-  create_table "groupusers", force: :cascade do |t|
-    t.string "groupid"
-    t.string "user"
+  create_table "groups_users", force: :cascade do |t|
+    t.string "group_id"
+    t.string "user_id"
   end
 
   create_table "users", force: :cascade do |t|
-    t.string  "userid"
+    t.string  "user_id"
     t.string  "password"
-    t.string  "username"
+    t.string  "user_name"
     t.integer "latitude"
     t.integer "longitude"
-    t.string  "loginnow"
+    t.string  "login_now"
   end
 
 end
