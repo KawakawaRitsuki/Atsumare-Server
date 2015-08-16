@@ -6,7 +6,7 @@ require "sinatra/json"
 ActiveRecord::Base.establish_connection(ENV['DATABASE_URL']||"sqlite3:db/development.db")
 require './models/user.rb'
 require './models/group.rb'
-require './models/groups_user.rb'
+require './models/groups_users.rb'
 require 'json'
 require 'uri'
 
@@ -16,31 +16,26 @@ require 'uri'
 # u.password = result["password"]
 # u.save
 
-get '/' do#将来的に削除したほうがいいかも。実際不要なメソッドだし
-  "ようこそ!このサイトは、POSTを掛けることによりデータベースに追加していきます。"
-end
+# レスポンス合わせる
+#
+# 0...成功
+# 1~...失敗
+
 
 post '/get' do#取得部分/未実装
-  #groupid
+  #group_id
+
   result = JSON.parse(request.body.read)
+  u = Group.where(:group_id => result["group_id"])
 
+  u.each do |g|
+    users = g.user
+    users.each do |user|
+      puts "#{user.user_id},#{user.user_name},#{user.latitude},#{user.longitude}"
 
-
-  Group.find(8).groupuser.groupname
-
-  groupuser = Groupuser.where(:groupid => result["groupid"]).first
-  # for group.pluck(:user).
-  # puts group
-
-  # u = User.find_by(user: group.)
-
-  group = groupuser.groups
-
-  puts group.latitude
-
-  group.pluck(:user).size.times{ |e|
-    puts group.pluck(:user)[e]
-  }
+    end
+  end
+  # "おｋ"
 
 end
 
@@ -65,9 +60,11 @@ post '/signup' do#会員登録部分/実装完了
   end
 end
 
+post '/login' do#ログイン部分/仮実装完了
   #userid/password
   result = JSON.parse(request.body.read)
-  gather = User.find_by[user_id:result["id"]]
+  gather = User.where(:user_id => result["user_id"]).first
+  # User.find_by[user_id:result["user_id"]]
 
   if gather == nil
     "IDが存在しません"
@@ -110,15 +107,8 @@ post '/makegroup' do#グループ作成/実装完了
     end
   end
 
-  g  = Group.new
-  g.group_id = newgroupid
-  g.group_name = result["group_name"]
-  g.save
-
-  gu = GroupsUser.new
-  gu.group_id = newgroupid
-  gu.user_id = result["user_id"]
-  gu.save
+  u = User.where(:user_id => result["user_id"]).first
+  u.group.create(:group_name => result["group_name"],:group_id => newgroupid)
 
 end
 
@@ -128,18 +118,11 @@ post '/ingroup' do#グループに入る/実装完了
   #重複していないかを確認
   result = JSON.parse(request.body.read)
 
-  g = Group.where(:group_id => result["group_id"]).first
+  gu = GroupsUser.new
+  gu.group_id = Group.where(:group_id => result["group_id"]).first.id
+  gu.user_id = User.where(:user_id => result["user_id"]).first.id
+  gu.save
 
-  if g != nil
-    gu = Groupuser.new
-    gu.group_id = result["group_id"]
-    gu.user_id = result["user_id"]
-    gu.save
-
-    "グループ名:#{g.groupname}に入りました。"
-  else
-    "グループが存在しません。グループIDを確認して下さい。"
-  end
 end
 
 # post '/outgroup' do#グループから出る/実装完了（未確認）
