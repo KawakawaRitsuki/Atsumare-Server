@@ -20,22 +20,26 @@ require 'uri'
 #
 # 0...成功
 # 1~...失敗
+# その他、情報の取得等はJSON形式で返す
 
 
-post '/get' do#取得部分/未実装
+post '/get' do#取得部分/実装
   #group_id
 
   result = JSON.parse(request.body.read)
   u = Group.where(:group_id => result["group_id"])
 
+  str = "{\"data\":["
+
   u.each do |g|
     users = g.user
     users.each do |user|
-      puts "#{user.user_id},#{user.user_name},#{user.latitude},#{user.longitude}"
-
+      str = str + "{\"user_id\":\"#{user.user_id}\",\"user_name\":\"#{user.user_name}\",\"latitude\":\"#{user.latitude}\",\"longitude\":\"#{user.longitude}\"},"
     end
   end
-  # "おｋ"
+
+  str = str[0,str.length-2] + "]}"
+  "#{str}"
 
 end
 
