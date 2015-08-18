@@ -57,10 +57,9 @@ post '/signup' do#会員登録部分/実装完了
     u.longitude = 0
     u.login_now = ""
     u.save
-    # "Signuped"
-    "会員登録完了"
+    "0"
   else
-    "同じIDのユーザーが存在しています。別のIDでお試しください。"
+    "1"
   end
 end
 
@@ -68,15 +67,11 @@ post '/login' do#ログイン部分/仮実装完了
   #userid/password
   result = JSON.parse(request.body.read)
   gather = User.where(:user_id => result["user_id"]).first
-  # User.find_by[user_id:result["user_id"]]
-
-  if gather == nil
-    "IDが存在しません"
-  elsif gather.password == result["password"]
-    "ログイン完了"
+  if gather.password == result["password"]
+    "0"
     #この時に、Loginnowの部分を書く
   else
-    "PWが違います"
+    "1"
   end
 
 end
@@ -84,17 +79,14 @@ end
 post '/regist' do#緯度経度登録部分/実装完了
   #userid/latitude/longitude
   result = JSON.parse(request.body.read)
-
   u = User.where(:user_id => result["user_id"]).first
-
   if u != nil
     u.latitude = result["latitude"]
     u.longitude = result["longitude"]
     u.save
-    # "Registed"
-    "位置情報更新完了"
+    "0"
   else
-    "そのようなUserIDは存在しません。（本来ならこのレスポンスは返りません）"
+    "1"
   end
 
 end
@@ -114,6 +106,7 @@ post '/makegroup' do#グループ作成/実装完了
   u = User.where(:user_id => result["user_id"]).first
   u.group.create(:group_name => result["group_name"],:group_id => newgroupid)
 
+  "#{newgroupid}"
 end
 
 post '/ingroup' do#グループに入る/実装完了
@@ -129,16 +122,34 @@ post '/ingroup' do#グループに入る/実装完了
 
 end
 
-# post '/outgroup' do#グループから出る/実装完了（未確認）
-#   #groupid/userid
-#   result = JSON.parse(request.body.read)
-#   g = Group.where(:groupid => result["groupid"]).first
-#
-#   if g != nil
-#     gu = Groupuser.where(:groupid => result["groupid"]).first
-#     gu.destroy
-#     "グループ名:#{g.groupname}から退出しました。"
-#   else
-#     "このグループには入っていません。グループIDを確認して下さい。"
-#   end
-# end
+post '/outgroup' do#グループから出る/実装完了
+  #group_id/userid
+  result = JSON.parse(request.body.read)
+  #
+  # groupuser = GroupsUser.where(:id => 25)
+  # puts groupuser.count
+
+  user = User.where(:user_id => result["user_id"]).first
+  group = Group.where(:group_id => result["group_id"]).first
+
+  if user != nil && group != nil
+    groupuser = GroupsUser.where(:user_id => user.id,:group_id => group.id).first
+    groupuser.destroy
+
+    groupuser = GroupsUser.where(:group_id => group.id)
+    if groupuser.count == 0
+      g = Group.where(:id => group.id).first
+      g.destroy
+      "最終退出者です。グループを破棄しました。"
+    else
+      "グループから退出しました。"
+    end
+
+
+  else
+    "1"
+  end
+
+  #グループのメンバーが0じゃないかを確認しないと
+
+end
