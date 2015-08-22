@@ -10,20 +10,7 @@ require './models/groups_users.rb'
 require 'json'
 require 'uri'
 
-#{"userid":"ユーザーID","password":"パスワード","nickname":"ニックネーム","latitude":"緯度","longitude":"経度","loginnow":"ログイン中"}
-# u = User.new
-# u.userid = result["userid"]
-# u.password = result["password"]
-# u.save
-
-# レスポンス合わせる
-#
-# 0...成功
-# 1~...失敗
-# その他、情報の取得等はJSON形式で返す
-
-
-post '/get' do#取得部分/実装
+post '/getlocate' do#取得部分/実装完了
   #group_id
 
   result = JSON.parse(request.body.read)
@@ -38,7 +25,29 @@ post '/get' do#取得部分/実装
     end
   end
 
-  str = str[0,str.length-2] + "]}"
+  str = str[0,str.length-1] + "]}"
+  "#{str}"
+
+end
+
+post '/getgroup' do#取得部分/実装完了
+  #user_id
+
+  result = JSON.parse(request.body.read)
+
+  user = User.where(:user_id => result["user_id"])
+
+
+  str = "{\"data\":["
+
+  user.each do |u|
+    groups = u.group
+    groups.each do |g|
+      str = str + "{\"group_id\":\"#{g.group_id}\",\"group_name\":\"#{g.group_name}\"},"
+    end
+  end
+
+  str = str[0,str.length-1] + "]}"
   "#{str}"
 
 end
@@ -125,10 +134,6 @@ end
 post '/outgroup' do#グループから出る/実装完了
   #group_id/userid
   result = JSON.parse(request.body.read)
-  #
-  # groupuser = GroupsUser.where(:id => 25)
-  # puts groupuser.count
-
   user = User.where(:user_id => result["user_id"]).first
   group = Group.where(:group_id => result["group_id"]).first
 
@@ -140,16 +145,10 @@ post '/outgroup' do#グループから出る/実装完了
     if groupuser.count == 0
       g = Group.where(:id => group.id).first
       g.destroy
-      "最終退出者です。グループを破棄しました。"
-    else
-      "グループから退出しました。"
     end
-
-
+    "0"
   else
     "1"
   end
-
-  #グループのメンバーが0じゃないかを確認しないと
 
 end
