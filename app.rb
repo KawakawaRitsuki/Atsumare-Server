@@ -47,8 +47,11 @@ post '/getgroup' do#グループのメンバー取得部分
   end
 
   str = str[0,str.length-1] + "]}"
-  "#{str}"
-
+  if str == "{\"data\":]}"
+    "notfound"
+  else
+    "#{str}"
+  end
 end
 
 post '/signup' do#会員登録部分
@@ -75,10 +78,15 @@ post '/login' do#ログイン部分
   #userid/password
   result = JSON.parse(request.body.read)
   gather = User.where(:user_id => result["user_id"]).first
-  if gather.password == result["password"]
-    "0"
-    #この時に、Loginnowの部分を書く
-  else
+
+  begin
+    if gather.password == result["password"]
+      "0"
+      #この時に、Loginnowの部分を書く
+    else
+      "1"
+    end
+  rescue => e
     "1"
   end
 
@@ -97,9 +105,12 @@ end
 post '/grouplogout' do#グループとしてのログアウト部分
   #user_id
   result = JSON.parse(request.body.read)
-  user = User.where(:user_id => result["user_id"]).first
-  user.login_now = ""
-  user.save
+
+    user = User.where(:user_id => result["user_id"]).first
+  if user != nil
+    user.login_now = ""
+    user.save
+  end
   "0"
 
 end
@@ -145,10 +156,17 @@ post '/ingroup' do#グループ加入
   result = JSON.parse(request.body.read)
 
   gu = GroupsUser.new
-  gu.group_id = Group.where(:group_id => result["group_id"]).first.id
-  gu.user_id = User.where(:user_id => result["user_id"]).first.id
-  gu.save
-  "0"
+
+  group = Group.where(:group_id => result["group_id"]).first
+  if group == nil
+    "1"
+  else
+    gu.group_id = group.id
+    gu.user_id = User.where(:user_id => result["user_id"]).first.id
+    gu.save
+    "0"
+  end
+
 end
 
 post '/outgroup' do#グループ退出
