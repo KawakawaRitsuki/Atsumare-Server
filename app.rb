@@ -21,7 +21,11 @@ post '/getlocate' do#メンバーの位置取得部分
   u.each do |g|
     users = g.user
     users.each do |user|
-      str = str + "{\"user_id\":\"#{user.user_id}\",\"user_name\":\"#{user.user_name}\",\"latitude\":\"#{user.latitude}\",\"longitude\":\"#{user.longitude}\"},"
+      if user.login_now == result["group_id"]
+        str = str + "{\"user_id\":\"#{user.user_id}\",\"user_name\":\"#{user.user_name}\",\"latitude\":\"#{user.latitude}\",\"longitude\":\"#{user.longitude}\",\"login\":\"0\"},"
+      else
+        str = str + "{\"user_id\":\"#{user.user_id}\",\"user_name\":\"#{user.user_name}\",\"latitude\":\"#{user.latitude}\",\"longitude\":\"#{user.longitude}\",\"login\":\"1\"},"
+      end
     end
   end
 
@@ -30,7 +34,7 @@ post '/getlocate' do#メンバーの位置取得部分
 
 end
 
-post '/getgroup' do#グループのメンバー取得部分
+post '/getgroup' do#グループ一覧取得部分
   #user_id
 
   result = JSON.parse(request.body.read)
