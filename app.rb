@@ -34,9 +34,28 @@ post '/getlocate' do#メンバーの位置取得部分
 
 end
 
+post '/getusing' do#利用中かどうか弾く
+  #group_id
+
+  result = JSON.parse(request.body.read)
+  g = Group.where(:group_id => result["group_id"]).first
+
+  "#{g.use}"
+
+end
+
+post '/setusing' do#利用中かどうか弾く
+  #group_id,using\
+  result = JSON.parse(request.body.read)
+  g = Group.where(:group_id => result["group_id"]).first
+  g.use = result["using"]
+  g.save
+  "0"
+
+end
+
 post '/getgroup' do#グループ一覧取得部分
   #user_id
-
   result = JSON.parse(request.body.read)
 
   user = User.where(:user_id => result["user_id"])
@@ -115,7 +134,20 @@ post '/grouplogout' do#グループとしてのログアウト部分
     user.login_now = ""
     user.save
   end
-  "0"
+
+  u = Group.where(:group_id => result["group_id"])
+
+  str = ""
+
+  u.each do |g|
+    users = g.user
+    users.each do |userr|
+      str = str + "#{userr.login_now}"
+    end
+  end
+
+  str = str[0,str.length-1]
+  "#{str}1"
 
 end
 
@@ -210,7 +242,10 @@ post '/loginstate' do#メンバーのログイン状態取得
     end
   end
 
-  str = str[0,str.length-1] + "]}"
+  gr = Group.where(:group_id => result["group_id"]).first
+
+
+  str = str[0,str.length-1] + "],\"using\":#{gr.use}}"
   "#{str}"
 
 end
