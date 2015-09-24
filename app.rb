@@ -26,6 +26,7 @@ post '/getlocate' do#メンバーの位置取得部分
       else
         str = str + "{\"user_id\":\"#{user.user_id}\",\"user_name\":\"#{user.user_name}\",\"latitude\":\"#{user.latitude}\",\"longitude\":\"#{user.longitude}\",\"login\":\"1\"},"
       end
+      # str = str + "{\"user_id\":\"#{user.user_id}\",\"user_name\":\"#{user.user_name}\",\"latitude\":\"#{user.latitude}\",\"longitude\":\"#{user.longitude}\"},"
     end
   end
 
@@ -159,11 +160,30 @@ post '/regist' do#位置登録部分
     u.latitude = result["latitude"]
     u.longitude = result["longitude"]
     u.save
-    "0"
-  else
-    "1"
   end
 
+end
+
+post '/logincheck' do
+  result = JSON.parse(request.body.read)
+
+  uu = Group.where(:group_id => result["group_id"])
+
+  str = "{\"data\":["
+
+  uu.each do |g|
+    users = g.user
+    users.each do |user|
+      if user.login_now == result["group_id"]
+        str = str + "{\"user_id\":\"#{user.user_id}\",\"user_name\":\"#{user.user_name}\",\"login\":\"0\"},"
+      else
+        str = str + "{\"user_id\":\"#{user.user_id}\",\"user_name\":\"#{user.user_name}\",\"login\":\"1\"},"
+      end
+    end
+  end
+
+  str = str[0,str.length-1] + "]}"
+  "#{str}"
 end
 
 post '/makegroup' do#グループ作成
