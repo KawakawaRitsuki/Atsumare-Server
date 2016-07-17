@@ -35,6 +35,19 @@ post '/getlocate' do#メンバーの位置取得部分
 
 end
 
+post '/twittercheck' do#Twitter ScreenName Check 
+  #user_id
+
+  result = JSON.parse(request.body.read)
+  user = User.where(:user_id => result["user_id"]).first
+  if user
+    "0"
+  else
+    "1"
+  end
+
+end
+
 post '/getusing' do#利用中かどうか弾く
   #group_id
 
@@ -76,6 +89,24 @@ post '/getgroup' do#グループ一覧取得部分
   else
     "#{str}"
   end
+end
+
+post '/isgroup' do
+  result = JSON.parse(request.body.read)
+  user = User.where(:user_id => result["user_id"])
+  i = 1
+  user.each do |u|
+    p 1
+    groups = u.group
+    groups.each do |g|
+      p 2
+      if result["group_id"] == g.group_id
+        i = 0
+        p 3
+      end
+    end
+  end
+  "#{i}"
 end
 
 post '/signup' do#会員登録部分
